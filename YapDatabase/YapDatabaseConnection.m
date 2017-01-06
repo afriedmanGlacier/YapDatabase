@@ -3568,6 +3568,9 @@ static int connectionBusyHandler(void *ptr, int count)
             
             if (writeQueueStillSuspended && longLivedReadTransaction && (snapshot == [database snapshot]))
             {
+                YDBLogError(@"Performing snapshot: "
+                            @"%llu vs %llu", snapshot, [database snapshot]);
+                
                 NSArray *empty = [self beginLongLivedReadTransaction];
                 
                 
@@ -3576,13 +3579,10 @@ static int connectionBusyHandler(void *ptr, int count)
                 {
                     YDBLogError(@"Core logic failure! "
                                 @"Silent longLivedReadTransaction reset resulted in non-empty notification array!");
-                } else {
-                    YDBLogError(@"Snapshot successful! %d"
-                                @"%d vs %d", snapshot, [database snapshot]);
                 }
             } else {
                 YDBLogError(@"Snapshot is behind! "
-                            @"%d vs %d", snapshot, [database snapshot]);
+                            @"%llu vs %llu", snapshot, [database snapshot]);
             }
             
             // Resume the writeQueue
