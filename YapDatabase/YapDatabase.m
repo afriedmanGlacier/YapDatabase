@@ -23,7 +23,7 @@
 #if robbie_hanson
   static const int ydbLogLevel = YDB_LOG_LEVEL_INFO;
 #elif DEBUG
-  static const int ydbLogLevel = YDB_LOG_LEVEL_INFO;
+  static const int ydbLogLevel = YDB_LOG_LEVEL_VERBOSE;
 #else
   static const int ydbLogLevel = YDB_LOG_LEVEL_WARN;
 #endif
@@ -3016,11 +3016,13 @@ static BOOL const YDB_PRINT_WAL_SIZE = YES;
 				__strong YapDatabase *strongSelf2 = weakSelf;
 				if (strongSelf2 == nil) return;
 				
+                YDBLogInfo(@"maybeReset %d connections...", strongSelf2->connectionStates.count);
 				for (YapDatabaseConnectionState *state in strongSelf2->connectionStates)
 				{
 					if (state->longLivedReadTransaction &&
 						state->lastTransactionSnapshot == strongSelf2->snapshot)
 					{
+                        YDBLogInfo(@"maybeReset: %@ %@", state->connection, state->connection.name);
 						[state->connection maybeResetLongLivedReadTransaction];
 					}
 				}
