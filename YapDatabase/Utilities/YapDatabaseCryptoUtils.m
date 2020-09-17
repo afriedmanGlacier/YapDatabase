@@ -253,6 +253,17 @@ NSError *YDBErrorWithDescription(NSString *description)
         }
     }
 
+    // needed for a YapDatabase set to version 3. It would be better to make this an option
+    {
+        char *errorMsg;
+        NSString *pragmaCommand = [NSString stringWithFormat:@"PRAGMA cipher_compatibility = %lu", YapDatabaseCipherCompatability_Version3];
+        if (sqlite3_exec(db, [pragmaCommand UTF8String], NULL, NULL, &errorMsg) != SQLITE_OK)
+        {
+            YDBLogError(@"failed to set database cipher_compatibility: %s", errorMsg);
+            return YDBErrorWithDescription(@"Failed to set database cipher_compatibility");
+        }
+    }
+
     // -----------------------------------------------------------
     //
     // This block was derived from [Yapdatabase configureDatabase].
