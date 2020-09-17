@@ -221,7 +221,17 @@ static YDBLogHandler logHandler = nil;
 + (YapDatabaseDeserializer)defaultDeserializer
 {
 	return ^ id (NSString __unused *collection, NSString __unused *key, NSData *data){
-		return data && data.length > 0 ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
+        id deserial = nil;
+        @try {
+            if (data && data.length > 0) {
+                deserial = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            }
+        } @catch ( NSException *ex ) {
+            YDBLogError(@"defaultDeserializer crash");
+        } @finally {
+            //this will always get called even if there is an exception
+        }
+        return deserial;
 	};
 }
 
