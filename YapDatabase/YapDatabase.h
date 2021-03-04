@@ -967,6 +967,8 @@ extern NSString *const YapDatabaseModifiedExternallyKey;
  */
 @property (atomic, assign, readwrite) NSTimeInterval connectionPoolLifetime;
 
+- (void) tryToCheckpoint;
+
 @end
 
 NS_ASSUME_NONNULL_END

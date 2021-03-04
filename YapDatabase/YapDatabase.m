@@ -3303,6 +3303,12 @@ static YDBLogHandler logHandler = nil;
 	}
 }
 
+// experiemental and only for use when closing out the DB with cross-threaded applications
+// such as share extensions
+- (void) tryToCheckpoint {
+    [self passiveCheckpoint];
+}
+
 - (void)asyncPassiveCheckpoint
 {
 	bool hasPendingCheckpoint = atomic_flag_test_and_set(&pendingPassiveCheckpoint);
