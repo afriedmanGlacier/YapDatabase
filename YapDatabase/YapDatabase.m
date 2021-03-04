@@ -3309,6 +3309,39 @@ static YDBLogHandler logHandler = nil;
     [self passiveCheckpoint];
 }
 
+// experiemental and only for use when closing out the DB with cross-threaded applications
+// such as share extensions
+- (void) quietlyResetInstance {
+    while ([connectionPoolValues count] > 0)
+    {
+        NSDictionary *value = [connectionPoolValues objectAtIndex:0];
+        
+        sqlite3 *aDb = (sqlite3 *)[[value objectForKey:YDBConnectionPoolValueKey_db] pointerValue];
+        
+        int status = sqlite3_close(aDb);
+        if (status != SQLITE_OK)
+        {
+            YDBLogError(@"Error in sqlite_close: %d %s", status, sqlite3_errmsg(aDb));
+        }
+        
+        [connectionPoolValues removeObjectAtIndex:0];
+        [connectionPoolDates removeObjectAtIndex:0];
+    }
+    
+    if (connectionPoolTimer)
+        dispatch_source_cancel(connectionPoolTimer);
+    
+    if (db) {
+        sqlite3_close(db);
+        db = NULL;
+    }
+    if (yap_vfs_shim) {
+        yap_vfs_shim_unregister(&yap_vfs_shim);
+    }
+    
+    [YapDatabaseManager deregisterDatabaseForPath:[databaseURL path]];
+}
+
 - (void)asyncPassiveCheckpoint
 {
 	bool hasPendingCheckpoint = atomic_flag_test_and_set(&pendingPassiveCheckpoint);
